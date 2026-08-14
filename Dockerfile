@@ -1,4 +1,4 @@
-FROM php:8.3-apache
+FROM php:8.4-apache
 
 RUN apt-get update && apt-get install -y \
     libpng-dev \
@@ -20,11 +20,10 @@ WORKDIR /var/www/html
 
 COPY . .
 
-# PASO 1: Instalar con --no-scripts para evitar el error
 RUN composer install --no-dev --optimize-autoloader --ignore-platform-req=php --no-scripts
 
-# Ejecutar los scripts manualmente (ignorando errores temporalmente)
-RUN composer dump-autoload --optimize
+RUN composer dump-autoload --optimize --ignore-platform-req=php
+
 RUN php artisan optimize:clear || true
 RUN php artisan config:cache || true
 RUN php artisan route:cache || true
