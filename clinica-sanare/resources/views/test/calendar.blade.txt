@@ -1,0 +1,9 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Calendario Test</title>
+</head>
+<body>
+    <h1>Calendario funciona!</h1>
+</body>
+</html>
