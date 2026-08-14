@@ -1,6 +1,5 @@
 FROM php:8.4-apache
 
-# Instalar dependencias incluyendo PostgreSQL
 RUN apt-get update && apt-get install -y \
     libpng-dev \
     libjpeg-dev \
@@ -27,7 +26,6 @@ RUN apt-get update && apt-get install -y \
 
 RUN a2enmod rewrite
 
-# Configurar Apache para usar /public
 ENV APACHE_DOCUMENT_ROOT /var/www/html/public
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
 RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
@@ -43,15 +41,26 @@ RUN composer install --no-dev --optimize-autoloader --ignore-platform-req=php --
 
 RUN composer dump-autoload --optimize --ignore-platform-req=php
 
+# DEBUG ACTIVADO
 RUN php artisan optimize:clear || true
 RUN php artisan config:cache || true
 RUN php artisan route:cache || true
 RUN php artisan view:cache || true
 RUN php artisan storage:link || true
 
+# Verificar el error específico
+RUN php artisan route:list || true
+RUN php artisan config:show database || true
+
+# Crear archivo de log
+RUN touch storage/logs/laravel.log && chmod 666 storage/logs/laravel.log
+
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html/storage \
     && chmod -R 755 /var/www/html/bootstrap/cache
+
+# Health check
+RUN echo "OK" > /var/www/html/public/healthz
 
 EXPOSE 80
 
